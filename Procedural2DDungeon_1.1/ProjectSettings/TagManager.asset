@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Floor
+    uniqueID: 2179652287
+    locked: 0
+  - name: Wall
+    uniqueID: 3938439803
+    locked: 0
+  - name: RuleTilemap
+    uniqueID: 1403282375
+    locked: 0
+  - name: HeatMap
+    uniqueID: 1676226093
+    locked: 0
+  - name: TypesRooms
+    uniqueID: 1717097319
+    locked: 0
