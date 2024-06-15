@@ -17,26 +17,6 @@ public class PlacerItems : MonoBehaviour
 	[SerializeField] private List<Item> items;
 	private int roomNumberIter;
 
-	private static List<Vector2Int> neighbours4Directions = new List<Vector2Int>
-	{
-		new Vector2Int(0, 1),
-		new Vector2Int(1, 0),
-		new Vector2Int(0, -1),
-		new Vector2Int(-1, 0),
-	};
-
-	private static List<Vector2Int> neighbours8Directions = new List<Vector2Int>
-	{
-		new Vector2Int(0, 1),
-		new Vector2Int(1, 0),
-		new Vector2Int(0, -1),
-		new Vector2Int(-1, 0),
-		new Vector2Int(1, 1),
-		new Vector2Int(1, -1),
-		new Vector2Int(-1, 1),
-		new Vector2Int(-1, -1)
-	};
-
 	public List<Item> PlaceItemsInRooms(List<Room> rooms, HashSet<Vector2Int> corridorPositions)
 	{
 		items = new List<Item>();
@@ -120,12 +100,12 @@ public class PlacerItems : MonoBehaviour
 
 	private List<Vector2Int> GetNeighbours8Directions(Vector2Int startPosition, HashSet<Vector2Int> floor)
 	{
-		return GetNeighbours(startPosition, floor, neighbours8Directions);
+		return GetNeighbours(startPosition, floor, Directions.allDirectionsList);
 	}
 
 	private List<Vector2Int> GetNeighbours4Directions(Vector2Int startPosition, HashSet<Vector2Int> floor)
 	{
-		return GetNeighbours(startPosition, floor, neighbours4Directions);
+		return GetNeighbours(startPosition, floor, Directions.mainDirectionsList);
 	}
 
 	private List<Vector2Int> GetNeighbours(Vector2Int startPosition, HashSet<Vector2Int> floor, List<Vector2Int> neighboursOffsetList)

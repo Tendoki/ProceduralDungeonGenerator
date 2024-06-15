@@ -38,33 +38,6 @@ public class TilemapVisualizer : MonoBehaviour
 	[Header("Items")]
 	[SerializeField] private Tilemap itemsTilemap;
 
-	public void PaintFloorTiles(IEnumerable<Vector2Int> floorPositions)
-	{
-		PaintTiles(floorPositions, floorTilemap, floorTile);
-	}
-
-	public void PaintCorridorTiles(IEnumerable<Vector2Int> corridorPositions)
-	{
-		PaintTiles(corridorPositions, corridorTilemap, floorTile);
-	}
-
-	public void PaintHeatMap(IEnumerable<Tuple<Vector2Int, int>> corridorPositionsWithDistance, int maxDistance)
-	{
-		foreach (var position in corridorPositionsWithDistance)
-		{
-			var tilePosition = heatTilemap.WorldToCell((Vector3Int)position.Item1);
-			heatTilemap.SetTile(tilePosition, heatMapTile);
-			heatTilemap.SetTileFlags(tilePosition, TileFlags.None);
-			//heatTilemap.SetColor(tilePosition, new Color(1, 0, 0));
-			heatTilemap.SetColor(tilePosition, new Color(position.Item2 / (float)maxDistance, 1 - (position.Item2 / (float)maxDistance), 0));
-		}
-	}
-
-	public void PaintAllTilesWithRule(IEnumerable<Vector2Int> positions)
-	{
-		PaintTiles(positions, ruleTilemap, ruleTile);
-	}
-	
 	private void PaintTiles(IEnumerable<Vector2Int> positions, Tilemap tilemap, TileBase tile)
 	{
 		foreach (var position in positions)
@@ -77,6 +50,33 @@ public class TilemapVisualizer : MonoBehaviour
 	{
 		var tilePosition = tilemap.WorldToCell((Vector3Int)position);
 		tilemap.SetTile(tilePosition, tile);
+	}
+
+	public void PaintFloorTiles(IEnumerable<Vector2Int> floorPositions)
+	{
+		PaintTiles(floorPositions, floorTilemap, floorTile);
+	}
+
+	public void PaintCorridorTiles(IEnumerable<Vector2Int> corridorPositions)
+	{
+		PaintTiles(corridorPositions, corridorTilemap, floorTile);
+	}
+
+	public void PaintAllTilesWithRule(IEnumerable<Vector2Int> positions)
+	{
+		PaintTiles(positions, ruleTilemap, ruleTile);
+	}
+
+	public void PaintHeatMap(IEnumerable<Tuple<Vector2Int, int>> corridorPositionsWithDistance, int maxDistance)
+	{
+		foreach (var position in corridorPositionsWithDistance)
+		{
+			var tilePosition = heatTilemap.WorldToCell((Vector3Int)position.Item1);
+			heatTilemap.SetTile(tilePosition, heatMapTile);
+			heatTilemap.SetTileFlags(tilePosition, TileFlags.None);
+			//heatTilemap.SetColor(tilePosition, new Color(1, 0, 0));
+			heatTilemap.SetColor(tilePosition, new Color(position.Item2 / (float)maxDistance, 1 - (position.Item2 / (float)maxDistance), 0));
+		}
 	}
 
 	public void Clear()

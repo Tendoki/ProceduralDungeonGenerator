@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
 
-public class BSPDungeonGenerator : SimpleRandomWalkDungeonGenerator
+public class BSPDungeonGenerator : RandomWalkRoomGenerator
 {
 	[SerializeField]
 	private PlacerItems placerItems;
@@ -44,10 +44,10 @@ public class BSPDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
 	protected override void RunProceduralGeneration()
 	{
-		CreateDungeon();
+		GenerateBSPDungeon();
 	}
 
-	private void CreateDungeon()
+	private void GenerateBSPDungeon()
 	{
 		roomsDictionary = new Dictionary<Vector2Int, HashSet<Vector2Int>>();
 		roomsList = new List<BoundsInt>();
@@ -79,7 +79,7 @@ public class BSPDungeonGenerator : SimpleRandomWalkDungeonGenerator
 			NearestNeighborsGeneration(roomsList, corridors);
 
 		if (sizeCorridor > 1)
-			IncreaseCorridorsSize(corridors, floorPositions, sizeCorridor);
+			IncreaseSizeCorridors(corridors, floorPositions, sizeCorridor);
 
 		(List<Room> rooms, HashSet< Tuple<Vector2Int, int> > corridorPositionsWithDistance) = ItemPlacementAlgoritms.DetermineTypesRooms(roomsDictionary, roomsList, corridorPositions, enimiesRoomPercent,
 			countTreasureRoom);
@@ -92,7 +92,7 @@ public class BSPDungeonGenerator : SimpleRandomWalkDungeonGenerator
 	{
 		tilemapVisualizer.PaintFloorTiles(floorInRoomPositions);
 		tilemapVisualizer.PaintCorridorTiles(corridorPositions);
-		HashSet<Vector2Int> walls = WallGenerator.CreateWalls(floorPositions, tilemapVisualizer, true);
+		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floorPositions, tilemapVisualizer, true);
 		HashSet<Vector2Int> allPositions = new HashSet<Vector2Int>();
 		allPositions.UnionWith(walls);
 		allPositions.UnionWith(floorPositions);
@@ -209,7 +209,7 @@ public class BSPDungeonGenerator : SimpleRandomWalkDungeonGenerator
 			var roomBounds = roomsList[i];
 			var roomCenter =
 				new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
-			var roomFloor = RunRandomWalk(randomWalkParameters, roomCenter);
+			var roomFloor = GenerateRandomWalkRoom(randomWalkRoomParameters, roomCenter);
 			HashSet<Vector2Int> newRoomFloor = new HashSet<Vector2Int>();
 			foreach (var position in roomFloor)
 			{

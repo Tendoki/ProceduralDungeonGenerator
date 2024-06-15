@@ -6,7 +6,7 @@ using static UnityEditor.VersionControl.Asset;
 
 public static class ProceduralGenerationAlgoritms
 {
-	public static HashSet<Vector2Int> SimpleRandomWalk(Vector2Int startPosition, int walkLength)
+	public static HashSet<Vector2Int> RandomWalk(Vector2Int startPosition, int walkLength)
 	{
 		HashSet<Vector2Int> path = new HashSet<Vector2Int>();
 
@@ -15,7 +15,7 @@ public static class ProceduralGenerationAlgoritms
 
 		for (int i = 0; i < walkLength; i++)
 		{
-			var newPosition = previousPosition + Direction2D.GetRandomCardinalDirection();
+			var newPosition = previousPosition + Directions.GetRandomMainDirection();
 			path.Add(newPosition);
 			previousPosition = newPosition;
 		}
@@ -23,10 +23,9 @@ public static class ProceduralGenerationAlgoritms
 		return path;
 	}
 
-	public static List<Vector2Int> RandomWalkCorridor(Vector2Int startPosition, int corridorLength)
+	public static List<Vector2Int> RandomWalkCorridor(Vector2Int startPosition, int corridorLength, Vector2Int direction)
 	{
 		List<Vector2Int> corridor = new List<Vector2Int>();
-		var direction = Direction2D.GetRandomCardinalDirection();
 		var currentPosition = startPosition;
 		corridor.Add(currentPosition);
 
@@ -318,9 +317,9 @@ public static class ProceduralGenerationAlgoritms
 	}
 }
 
-public static class Direction2D
+public static class Directions
 {
-	public static List<Vector2Int> cardinalDirectionsList = new List<Vector2Int>
+	public static List<Vector2Int> mainDirectionsList = new List<Vector2Int>
 	{
 		new Vector2Int(0, 1), //UP
 		new Vector2Int(1, 0), //RIGHT
@@ -340,8 +339,20 @@ public static class Direction2D
 		new Vector2Int(-1, 1) //LEFT-UP
 	};
 
-	public static Vector2Int GetRandomCardinalDirection()
+	public static Vector2Int GetRandomMainDirection()
 	{
-		return cardinalDirectionsList[Random.Range(0, cardinalDirectionsList.Count)];
+		return mainDirectionsList[Random.Range(0, mainDirectionsList.Count)];
+	}
+
+	public static Vector2Int GetRandomMainDirectionWithPreviousDir(Vector2Int previousDirection)
+	{
+		int index = Random.Range(0, mainDirectionsList.Count);
+		Vector2Int newDirection = mainDirectionsList[index];
+		if (previousDirection == new Vector2Int(-newDirection.x, -newDirection.y))
+		{
+			index = (index + 1) % mainDirectionsList.Count;
+			newDirection = mainDirectionsList[index];
+		}
+		return newDirection;
 	}
 }
