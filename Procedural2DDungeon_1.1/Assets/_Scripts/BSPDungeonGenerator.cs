@@ -39,8 +39,8 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 
 	private Dictionary<Vector2Int, HashSet<Vector2Int>> roomsDictionary;
 	//private List<HashSet<Vector2Int>> roomsPosition;
-	private HashSet<Vector2Int> floorPositions, corridorPositions, floorInRoomPositions;
-	private List<BoundsInt> roomsList;
+	private HashSet<Vector2Int> floor, corridorPositions, floorInRoomsPositions;
+	private List<BoundsInt> roomsBounds;
 
 	protected override void RunProceduralGeneration()
 	{
@@ -50,11 +50,11 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 	private void GenerateBSPDungeon()
 	{
 		roomsDictionary = new Dictionary<Vector2Int, HashSet<Vector2Int>>();
-		roomsList = new List<BoundsInt>();
+		roomsBounds = new List<BoundsInt>();
 		
-		floorPositions = new HashSet<Vector2Int>(); //все клетки пола
+		floor = new HashSet<Vector2Int>(); //все клетки пола
 		corridorPositions = new HashSet<Vector2Int>(); //клетки коридоров
-		floorInRoomPositions = new HashSet<Vector2Int>(); //клетки в комнатах
+		floorInRoomsPositions = new HashSet<Vector2Int>(); //клетки в комнатах
 		//roomsPosition = new List<HashSet<Vector2Int>>();
 
 		BoundsInt spaceToSplit = new BoundsInt((Vector3Int)startPosition,
@@ -63,25 +63,25 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 		//бинарное дерево пространств для соединения
 		BinaryTree tree = new BinaryTree(spaceToSplit);
 
-		roomsList = ProceduralGenerationAlgoritms.BinarySpacePartitioningBinaryTree(tree, minRoomWidth,
+		roomsBounds = ProceduralGenerationAlgoritms.BinarySpacePartitioningBinaryTree(tree, minRoomWidth,
 			minRoomHeight, offset, divideLessMin, sizeRoomCanLessMin, isStochastic);
 
 		if (randomWalkRooms)
-			floorPositions = CreateRoomsRandomly(roomsList); //создание комнат случайным блужданием
+			floorInRoomsPositions = CreateRoomsRandomly(roomsBounds); //создание комнат случайным блужданием
 		else
-			floorPositions = CreateSimpleRooms(roomsList); //создание обычных прямоугольных комнат
+			floorInRoomsPositions = CreateSimpleRooms(roomsBounds); //создание обычных прямоугольных комнат
+		floor.UnionWith(floorInRoomsPositions);
 
-		floorInRoomPositions.UnionWith(floorPositions);
-		List<List<Vector2Int>> corridors = new List<List<Vector2Int>>(); //список коридоров
+		List<List<Vector2Int>> corridors; //список коридоров
 		if (isBinaryTreeGenerate)
-			BinaryTreeGeneration(tree, corridors, floorPositions);
+			corridors = BinaryTreeGenerationCorridors(tree);
 		else
-			NearestNeighborsGeneration(roomsList, corridors);
+			corridors = NearestNeighborsGenerationCorridors(roomsBounds);
 
 		if (sizeCorridor > 1)
-			IncreaseSizeCorridors(corridors, floorPositions, sizeCorridor);
+			IncreaseSizeCorridors(corridors, floor, sizeCorridor);
 
-		(List<Room> rooms, HashSet< Tuple<Vector2Int, int> > corridorPositionsWithDistance) = ItemPlacementAlgoritms.DetermineTypesRooms(roomsDictionary, roomsList, corridorPositions, enimiesRoomPercent,
+		(List<Room> rooms, HashSet< Tuple<Vector2Int, int> > corridorPositionsWithDistance) = ItemPlacementAlgoritms.DetermineTypesRooms(roomsDictionary, roomsBounds, corridorPositions, enimiesRoomPercent,
 			countTreasureRoom);
 
 		List<Item> items = placerItems.PlaceItemsInRooms(rooms, corridorPositions);
@@ -90,12 +90,12 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 
 	private void VisualizeTiles(List<Room> rooms, List<Item> items, HashSet<Tuple<Vector2Int, int>> corridorPositionsWithDistance)
 	{
-		tilemapVisualizer.PaintFloorTiles(floorInRoomPositions);
+		tilemapVisualizer.PaintFloorTiles(floorInRoomsPositions);
 		tilemapVisualizer.PaintCorridorTiles(corridorPositions);
-		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floorPositions, tilemapVisualizer, true);
+		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floor, tilemapVisualizer, true);
 		HashSet<Vector2Int> allPositions = new HashSet<Vector2Int>();
 		allPositions.UnionWith(walls);
-		allPositions.UnionWith(floorPositions);
+		allPositions.UnionWith(floor);
 		tilemapVisualizer.PaintAllTilesWithRule(allPositions);
 		tilemapVisualizer.PaintTypeRooms(rooms);
 
@@ -103,8 +103,9 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 		tilemapVisualizer.PaintItemsTiles(items);
 	}
 
-	private void BinaryTreeGeneration(BinaryTree tree, List<List<Vector2Int>> corridors, HashSet<Vector2Int> floor)
+	private List<List<Vector2Int>> BinaryTreeGenerationCorridors(BinaryTree tree)
 	{
+		List<List<Vector2Int>> corridors = new List<List<Vector2Int>>();
 		Queue<Node> queue = new Queue<Node>();
 		queue.Enqueue(tree.root);
 
@@ -115,32 +116,27 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 			{
 				List<Vector2Int> centers = FindTwoRooms(space.LeftNode, space.RightNode);
 				List<Vector2Int> newCorridor = CreateCorridor(centers[0], centers[1]);
+
 				corridorPositions.UnionWith(newCorridor);
 				corridors.Add(newCorridor);
+				floor.UnionWith(newCorridor);
+
 				queue.Enqueue(space.LeftNode);
 				queue.Enqueue(space.RightNode);
 			}
 		}
-		foreach (var corridor in corridors)
-		{
-			floor.UnionWith(corridor);
-		}
+		return corridors;
 	}	
 
-	private void NearestNeighborsGeneration(List<BoundsInt> roomsList, List<List<Vector2Int>> corridors)
+	private List<List<Vector2Int>> NearestNeighborsGenerationCorridors(List<BoundsInt> roomsBounds)
 	{
 		List<Vector2Int> roomCenters = new List<Vector2Int>(); //центры всех комнат
-		foreach (var room in roomsList)
+		foreach (var room in roomsBounds)
 		{
 			roomCenters.Add(Vector2Int.RoundToInt(room.center));
 		}
 
-		corridors = ConnectRooms(roomCenters); //все коридоры
-		foreach (var corridor in corridors)
-		{
-			corridorPositions.UnionWith(corridor);
-			floorPositions.UnionWith(corridor);
-		}
+		return ConnectRooms(roomCenters);
 	}
 
 	private List<Vector2Int> FindTwoRooms(Node leftNode, Node rightNode)
@@ -201,12 +197,12 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 		return centers;
 	}
 
-	private HashSet<Vector2Int> CreateRoomsRandomly(List<BoundsInt> roomsList)
+	private HashSet<Vector2Int> CreateRoomsRandomly(List<BoundsInt> roomsBounds)
 	{
 		HashSet<Vector2Int> floor = new HashSet<Vector2Int>();
-		for (int i = 0; i < roomsList.Count; i++)
+		for (int i = 0; i < roomsBounds.Count; i++)
 		{
-			var roomBounds = roomsList[i];
+			var roomBounds = roomsBounds[i];
 			var roomCenter =
 				new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
 			var roomFloor = GenerateRandomWalkRoom(randomWalkRoomParameters, roomCenter);
@@ -219,17 +215,11 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 					newRoomFloor.Add(position);
 					floor.Add(position);
 				}
-				SaveRoomData(roomCenter, newRoomFloor);
+				roomsDictionary[roomCenter] = newRoomFloor;
 			}
 		}
 
 		return floor;
-	}
-
-	private void SaveRoomData(Vector2Int roomCenter, HashSet<Vector2Int> roomFloor)
-	{
-		//roomsPosition.Add(roomFloor);
-		roomsDictionary[roomCenter] = roomFloor;
 	}
 
 	private List<List<Vector2Int>> ConnectRooms(List<Vector2Int> roomCenters)
@@ -244,7 +234,10 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 			roomCenters.Remove(closest);
 			List<Vector2Int> newCorridor = CreateCorridor(currentRoomCenter, closest);
 			currentRoomCenter = closest;
+
 			corridors.Add(newCorridor);
+			corridorPositions.UnionWith(newCorridor);
+			floor.UnionWith(newCorridor);
 		}
 
 		return corridors;
@@ -315,10 +308,10 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 		return closest;
 	}
 
-	private HashSet<Vector2Int> CreateSimpleRooms(List<BoundsInt> roomsList)
+	private HashSet<Vector2Int> CreateSimpleRooms(List<BoundsInt> roomsBounds)
 	{
 		HashSet<Vector2Int> floor = new HashSet<Vector2Int>();
-		foreach (var room in roomsList)
+		foreach (var room in roomsBounds)
 		{
 			HashSet<Vector2Int> newRoomFloor = new HashSet<Vector2Int>();
 			var roomCenter = new Vector2Int(Mathf.RoundToInt(room.center.x), Mathf.RoundToInt(room.center.y));
@@ -331,7 +324,7 @@ public class BSPDungeonGenerator : RandomWalkRoomGenerator
 					floor.Add(position);
 				}
 			}
-			SaveRoomData(roomCenter, newRoomFloor);
+			roomsDictionary[roomCenter] = newRoomFloor;
 		}
 
 		return floor;
