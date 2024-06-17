@@ -35,37 +35,37 @@ public class RandomWalkDungeonGenerator : RandomWalkRoomGenerator
 		//создаем коридоры
 		List<List<Vector2Int>> corridors = CreateCorridors(corridorsFloorPositions, possibleRoomPositions);
 
-		HashSet<Vector2Int> roomsFloor = CreateRooms(possibleRoomPositions); //создаем комнаты
+		HashSet<Vector2Int> floorInRoomsPositions = CreateRooms(possibleRoomPositions); //создаем комнаты
 
 		List<Vector2Int> deadEnds = FindDeadEnds(corridorsFloorPositions); //находим тупики
-		CreateRoomsAtDeadEnds(deadEnds, roomsFloor); //добавляем комнаты в тупики
+		CreateRoomsAtDeadEnds(deadEnds, floorInRoomsPositions); //добавляем комнаты в тупики
 
-		HashSet<Vector2Int> floorPositions = UnionPositions(corridorsFloorPositions, roomsFloor);
+		HashSet<Vector2Int> floor = UnionPositions(corridorsFloorPositions, floorInRoomsPositions);
 
 		//увеличение размера коридоров
 		if (sizeCorridor > 1)
-			IncreaseSizeCorridors(corridors, floorPositions, sizeCorridor);
+			IncreaseSizeCorridors(corridors, floor, sizeCorridor);
 
 		//визуализация плиток
-		VisualizeTiles(floorPositions);
+		VisualizeTiles(floor);
 	}
 
 	private HashSet<Vector2Int> UnionPositions(HashSet<Vector2Int> corridorsFloorPositions, HashSet<Vector2Int> roomsFloor)
 	{
-		HashSet<Vector2Int> floorPositions = new HashSet<Vector2Int>(); //все позиции пола
-		floorPositions.UnionWith(corridorsFloorPositions); //объединяем c коридорами
-		floorPositions.UnionWith(roomsFloor); //объединяем с комнатами
+		HashSet<Vector2Int> floor = new HashSet<Vector2Int>(); //все позиции пола
+		floor.UnionWith(corridorsFloorPositions); //объединяем c коридорами
+		floor.UnionWith(roomsFloor); //объединяем с комнатами
 
-		return floorPositions;
+		return floor;
 	}
 
-	private void VisualizeTiles(HashSet<Vector2Int> floorPositions)
+	private void VisualizeTiles(HashSet<Vector2Int> floor)
 	{
-		tilemapVisualizer.PaintFloorTiles(floorPositions);
-		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floorPositions, tilemapVisualizer, true);
+		tilemapVisualizer.PaintFloorTiles(floor);
+		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floor, tilemapVisualizer, true);
 		HashSet<Vector2Int> allPositions = new HashSet<Vector2Int>();
 		allPositions.UnionWith(walls);
-		allPositions.UnionWith(floorPositions);
+		allPositions.UnionWith(floor);
 		tilemapVisualizer.PaintAllTilesWithRule(allPositions);
 	}
 

@@ -90,7 +90,7 @@ public class TilemapVisualizer : MonoBehaviour
 		itemsTilemap.ClearAllTiles();
 	}
 
-	public void PaintSingleBasicWall(Vector2Int position)
+	public void PaintSingleWall(Vector2Int position)
 	{
 		PaintSingleTile(wallTilemap, wallTop, position);
 	}

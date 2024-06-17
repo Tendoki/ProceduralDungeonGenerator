@@ -4,39 +4,39 @@ using UnityEngine;
 
 public static class WallsCreator
 {
-	public static HashSet<Vector2Int> CreateWalls(HashSet<Vector2Int> floorPositions, TilemapVisualizer tilemapVisualizer, bool withDiagonals)
+	public static HashSet<Vector2Int> CreateWalls(HashSet<Vector2Int> floor, TilemapVisualizer tilemapVisualizer, bool withDiagonals)
 	{
-		HashSet<Vector2Int> basicWallPositions = new HashSet<Vector2Int>();
+		HashSet<Vector2Int> walls = new HashSet<Vector2Int>();
 		if (withDiagonals)
 		{
-			basicWallPositions = FindWalls(floorPositions, Directions.allDirectionsList);
+			walls = FindWalls(floor, Directions.allDirectionsList);
 		}
 		else
 		{
-			basicWallPositions = FindWalls(floorPositions, Directions.mainDirectionsList);
+			walls = FindWalls(floor, Directions.mainDirectionsList);
 		}
 		
-		foreach (var position in basicWallPositions)
+		foreach (var position in walls)
 		{
-			tilemapVisualizer.PaintSingleBasicWall(position);
+			tilemapVisualizer.PaintSingleWall(position);
 		}
 
-		return basicWallPositions;
+		return walls;
 	}
 
-	private static HashSet<Vector2Int> FindWalls(HashSet<Vector2Int> floorPositions, List<Vector2Int> directionsList)
+	private static HashSet<Vector2Int> FindWalls(HashSet<Vector2Int> floor, List<Vector2Int> directionsList)
 	{
-		HashSet<Vector2Int> wallPositions = new HashSet<Vector2Int>();
-		foreach (var position in floorPositions)
+		HashSet<Vector2Int> walls = new HashSet<Vector2Int>();
+		foreach (var position in floor)
 		{
 			foreach (var direction in directionsList)
 			{
 				var neighbourPosition = position + direction;
-				if (!floorPositions.Contains(neighbourPosition))
-					wallPositions.Add(neighbourPosition);
+				if (!floor.Contains(neighbourPosition))
+					walls.Add(neighbourPosition);
 			}
 		}
 
-		return wallPositions;
+		return walls;
 	}
 }

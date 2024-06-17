@@ -10,38 +10,38 @@ public class RandomWalkRoomGenerator : AbstractGenerator
 	protected override void RunProceduralGeneration()
 	{
 		//генерация структуры пола комнаты
-		HashSet<Vector2Int> floorPositions = GenerateRandomWalkRoom(randomWalkRoomParameters, startPosition);
+		HashSet<Vector2Int> floor = GenerateRandomWalkRoom(randomWalkRoomParameters, startPosition);
 
 		//визуализация плиток
-		VisualizeTiles(floorPositions);
+		VisualizeTiles(floor);
 	}
 
-	private void VisualizeTiles(HashSet<Vector2Int> floorPositions)
+	private void VisualizeTiles(HashSet<Vector2Int> floor)
 	{
-		tilemapVisualizer.PaintFloorTiles(floorPositions);
+		tilemapVisualizer.PaintFloorTiles(floor);
 
 		//создание стен
-		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floorPositions, tilemapVisualizer, true);
+		HashSet<Vector2Int> walls = WallsCreator.CreateWalls(floor, tilemapVisualizer, true);
 
 		//рисование плиток по правилам
 		HashSet<Vector2Int> allPositions = new HashSet<Vector2Int>();
 		allPositions.UnionWith(walls);
-		allPositions.UnionWith(floorPositions);
+		allPositions.UnionWith(floor);
 		tilemapVisualizer.PaintAllTilesWithRule(allPositions);
 	}
 
 	protected HashSet<Vector2Int> GenerateRandomWalkRoom(RandomWalkRoomSO parameters, Vector2Int position)
 	{
 		var currentPosition = position;
-		HashSet<Vector2Int> floorPositions = new HashSet<Vector2Int>();
+		HashSet<Vector2Int> floor = new HashSet<Vector2Int>();
 		for (int i = 0; i < parameters.iterations; i++)
 		{
 			var path = ProceduralGenerationAlgoritms.RandomWalk(currentPosition, parameters.walkLength);
-			floorPositions.UnionWith(path);
+			floor.UnionWith(path);
 			if (parameters.startRandomlyEachIteration)
-				currentPosition = floorPositions.ElementAt(Random.Range(0, floorPositions.Count));
+				currentPosition = floor.ElementAt(Random.Range(0, floor.Count));
 		}
 
-		return floorPositions;
+		return floor;
 	}
 }
