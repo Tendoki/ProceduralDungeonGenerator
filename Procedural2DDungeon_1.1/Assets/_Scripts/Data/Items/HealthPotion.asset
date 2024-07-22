@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 883cecefb4e6b284fbd04277f83d74b7, type: 3}
   m_Name: HealthPotion
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 9127c90e0197ef842b6dec43ed345472, type: 2}
+  tile: {fileID: 11400000, guid: 4cf505166c124964ea483681a14dc33c, type: 2}
   size: {x: 1, y: 1}
   type: 0

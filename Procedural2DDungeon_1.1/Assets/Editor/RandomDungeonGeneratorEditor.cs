@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AbstractDungeonGenerator), true)]
+[CustomEditor(typeof(AbstractGenerator), true)]
 public class RandomDungeonGeneratorEditor : Editor
 {
-	private AbstractDungeonGenerator generator;
+	private AbstractGenerator generator;
 
 	private void Awake()
 	{
-		generator = (AbstractDungeonGenerator)target;
+		generator = (AbstractGenerator)target;
 	}
 
 	public override void OnInspectorGUI()
@@ -19,7 +19,7 @@ public class RandomDungeonGeneratorEditor : Editor
 		base.OnInspectorGUI();
 		if (GUILayout.Button("Create Dungeon"))
 		{
-			generator.GenerateDungeon();
+			generator.Generate();
 		}
 	}
 }

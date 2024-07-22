@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 883cecefb4e6b284fbd04277f83d74b7, type: 3}
   m_Name: ManaPotion
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 6b120f516d1393c49b86956aee3ce89a, type: 2}
+  tile: {fileID: 11400000, guid: 40dd924d60ec4c94a80f318b2153e739, type: 2}
   size: {x: 1, y: 1}
   type: 0
